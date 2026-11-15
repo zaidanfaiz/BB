@@ -9,14 +9,14 @@
 
 | Priority | Observation | Evidence | Status |
 | --- | --- | --- | --- |
-| High — verify data exposure | CrossPromotionDataProvider is exported. Read permission c.R is declared normal (0x00000000); write permission c.W is signature (0x00000002). A normal read permission is not a strong confidentiality boundary. | AndroidManifest.xml; policy-review.json | Confirmed configuration; information disclosure **not proven** |
+| Priority review — provider packaging | CrossPromotionDataProvider is declared exported, with normal read permission c.R and signature write permission c.W. A follow-up DEX audit did **not** find its class definition in the 14 packaged DEX files. | AndroidManifest.xml; policy-review.json; provider-review.json | Configuration confirmed; runtime provider instantiation and information disclosure **not demonstrated** |
 | Medium — transport hardening | Network base-config and a domain-config both specify cleartextTrafficPermitted=true. Actual HTTP usage and sensitive payload exposure were not observed. | res/xml/network_security_config.xml; deep-audit.json | Confirmed configuration, impact unverified |
 | Medium — dependency review | OSV scanner matched com.google.guava:guava 33.3.1-android to GHSA-xxph-c9ww-hj94 / CVE-2026-102554 (highest reported severity 8.2). Runtime use of the affected code path is unknown. | res/raw/aboutlibraries.json; osv-findings.json | Version match, not confirmed application exploit |
 | Medium — backup data review | Manifest enables allowBackup. The generic backup/data extraction rules in the APK include no explicit include/exclude entries. Effective manifest resource mapping, platform versions, and stored data still require verification. | AndroidManifest.xml; res/xml/backup_rules.xml; res/xml/data_extraction_rules.xml | Confirmed config, confidentiality risk unverified |
 | Low / review | 11 Unity Ads domain entries in the network configuration contain a trailing slash, unlike the hostname-only domain syntax documented by Android. | res/xml/network_security_config.xml; policy-review.json | Static syntax concern only |
 | Low / review | Two native libraries have no detectable full RELRO: lib/arm64-v8a/libnesec.so and lib/arm64-v8a/libnesec-x86.so. None of 31 inspected libraries request an executable GNU_STACK. | deep-audit.json | Hardening observation, no exploitability claim |
 
-## Android component inventory
+The provider follow-up checked 14 of 14 DEX files without parse errors. The named exported provider class was **not defined** in those files. This is a packaging/runtime verification item, not evidence of a working data-exposure path. See [BB_PROVIDER_REVIEW.md](BB_PROVIDER_REVIEW.md).\n\n## Android component inventory
 
 - 23 exported activities, aliases, receivers, services or providers.
 - 6 use declared component permission attributes (including read/write permission attributes).
@@ -34,7 +34,7 @@
 
 ## Suggested authorized verification
 
-1. Ask the application owner/developer to inspect CrossPromotionDataProvider's returned data and its permission checks, then use a least-privilege exported component policy.
+1. First confirm that the CrossPromotionDataProvider class is packaged or dynamically loaded in the real installable app; only then inspect any returned data and enforce least-privilege export/permissions.
 2. Restrict cleartext traffic to an explicitly justified set of hosts; review app behavior before changing legacy SDK requirements.
 3. Compare embedded Guava version with the patched release and confirm whether affected API code paths are reachable; remediate by updating the dependency where appropriate.
 4. Trace which backup rules the manifest actually references and remove sensitive information from backup.
