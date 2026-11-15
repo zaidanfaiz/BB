@@ -114,6 +114,10 @@ def scan():
                 "score_named_methods_application_count": len(app_score_methods),
                 "game_named_methods_application_count": len(app_game_methods),
                 "application_class_examples": app_classes[:30],
+                "class_names_matching_cocos_or_game": [c for c in classes if re.search(r"(?i)cocos2dx|block|juggle|appactivity|crosspromotiondataprovider", c)][:100],
+                "string_id_mentions_cocos": sum("cocos2dx" in t.lower() for t in strings),
+                "string_id_mentions_app_activity": sum("appactivity" in t.lower() for t in strings),
+                "all_score_named_method_samples": [{"class": c, "name": n, "origin": category(c)} for c, n in relevant_methods[:45]],
             })
         except (OSError, ValueError, IndexError) as exc:
             entry["status"] = "unparsed"
