@@ -16,7 +16,9 @@
 | Low / review | 11 Unity Ads domain entries in the network configuration contain a trailing slash, unlike the hostname-only domain syntax documented by Android. | res/xml/network_security_config.xml; policy-review.json | Static syntax concern only |
 | Low / review | Two native libraries have no detectable full RELRO: lib/arm64-v8a/libnesec.so and lib/arm64-v8a/libnesec-x86.so. None of 31 inspected libraries request an executable GNU_STACK. | deep-audit.json | Hardening observation, no exploitability claim |
 
-The provider follow-up checked 14 of 14 DEX files without parse errors. The named exported provider class was **not defined** in those files. This is a packaging/runtime verification item, not evidence of a working data-exposure path. See [BB_PROVIDER_REVIEW.md](BB_PROVIDER_REVIEW.md).\n\n## Android component inventory
+The provider follow-up checked 14 of 14 DEX files without parse errors. The named exported provider class was **not defined** in those files. This is a packaging/runtime verification item, not evidence of a working data-exposure path. See [BB_PROVIDER_REVIEW.md](BB_PROVIDER_REVIEW.md).
+
+## Android component inventory
 
 - 23 exported activities, aliases, receivers, services or providers.
 - 6 use declared component permission attributes (including read/write permission attributes).
