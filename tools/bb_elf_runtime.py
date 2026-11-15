@@ -35,7 +35,7 @@ MARKERS = {
 
 def run_readelf(path, *options):
     result = subprocess.run(["readelf", "-W", *options, str(path)], capture_output=True,
-                            text=True, timeout=35, check=False)
+                            text=True, encoding="utf-8", errors="replace", timeout=35, check=False)
     return result.stdout if result.returncode == 0 else ""
 
 def analyze(path):
