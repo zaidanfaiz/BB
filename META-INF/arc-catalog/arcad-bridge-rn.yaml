@@ -1,0 +1,31 @@
+# ============================================================================
+# 广告域模块自描述清单 - arc-config-plugin / ModuleCatalog 消费
+# ============================================================================
+# 文档：S4.3 plan 4.3.1（每广告模块根目录放 module.yaml）
+# 见同级 ../ad-api/module.yaml 头注释了解 Phase 1 接入路径
+# ============================================================================
+
+name: arcad-bridge-rn
+
+groupId: com.hs.sdk
+artifactId: bridge-rn
+version: 5.0.2-PoC-SNAPSHOT
+
+# RN bridge 是上层基础设施，依赖 common
+priority: 60
+
+dependsOn:
+  - common
+
+# RN bridge SPI（HsBridgeModuleProvider / HsUnifiedReactPackage 是已知例外命名，详见 ADR-S4.1 v1.2 §11.6）
+# 本期 module.yaml 仅记录 SPI 接口路径，命名回炉留 X2
+serviceProviders:
+  - com.hs.sdk.bridge.rn.HsBridgeModuleProvider
+
+placeholders:
+  required: []
+  optional: []
+
+features:
+  - rn
+  - bridge

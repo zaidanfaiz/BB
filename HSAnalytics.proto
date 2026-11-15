@@ -1,0 +1,54 @@
+// 使用PB3的语法
+syntax = "proto3";
+//// 模型文件前缀
+//option objc_class_prefix = "HSAnalytics";
+//包名
+package proto;
+//引入包
+//import "";
+//指定生成类所在的Java包名
+option java_package = "cn.hsdata.android";
+//重命名，如果不写，默认为文件名的首字母大写转化生成，如本文件如果不写则是Person
+option java_outer_classname = "HSAnalytics";
+
+message LogWrapper {
+  string device_id = 1;       // 设备唯一标识
+  string app_id = 2;          // App标识
+  int64 install_time = 3;    // App安装时间
+  string os = 4;              // 系统
+  int32 screen_width = 5;     // 屏幕宽度
+  int32 screen_height = 6;    // 屏幕高度
+  string device_model = 7;    // 机型
+  string device_type = 8;     // 设备类型
+  string bundle_id = 9;       // 包名
+  string manufacturer = 10;    // 设备制造商
+  int32 simulator = 11;       // 是否模拟器 1 是，0 否
+  int64 stime = 12;           // 服务器接收数据时间,客户端不用关心
+  string ip = 13;              // 服务器获取的客户端ip,客户端不用关心
+  repeated Model model = 100; // 业务数据
+}
+
+// message代表一个模型
+message Model {
+  string type = 1; //事件类型
+  string uuid = 2; //事件唯一标识
+  string distinct_id = 3; //本次安装唯一标识
+  string account_id = 4; // 用户标识
+  string event_name = 5; //事件名称
+  int64 time = 6; //事件时间戳
+  int32  zone_offset = 7; //时区
+  string network_type = 8;//网络类型
+  string carrier = 9; //运营商
+  string app_version = 10; // App版本
+  string os_version = 11; //系统版本
+  string lib_version = 12; //SDK版本号
+  string system_language = 13; //语言
+  string cpu = 14; //cpu型号
+  string ram = 15; //剩余内存/内存
+  string disk = 16; //剩余磁盘大小/磁盘大小
+  double fps = 17; //游戏帧率
+  string ab_test_id = 21; //线上ab测试的分组id
+  string properties = 22; //其余业务参数
+}
+
+

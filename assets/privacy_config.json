@@ -1,0 +1,13 @@
+{
+  "game_code": "game_1004",
+  "initial_salt": "417e5e306959ce281c46d398a8c05b1cf8c6481ffbe9edfb5eed874be24ca792",
+  "initial_salt_version": "v1",
+  "region_discovery_domain": "https://privacy-service.ali.afafb.com",
+  "region_service_url": "https://privacy-service.ali.afafb.com",
+  "enable_server_pseudonymization": false,
+  "fields": [
+    {"name": "distinct_id", "mode": "local"},
+    {"name": "device_id", "mode": "local"},
+    {"name": "account_id", "mode": "local"}
+  ]
+}

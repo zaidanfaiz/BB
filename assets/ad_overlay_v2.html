@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: transparent; overflow: hidden; }
+/* touch-action:none 必须有：默认 auto 时 WebView 会把滑动认成 pan 手势,直接吞掉指针发
+   pointercancel,既没有 pointerup 也没有 click,滑完抬手点不出落地页。overlay 本身没有任何
+   可滚动内容,整层关掉手势识别即可(touch-action 对祖先取交集,#root 置 none 即覆盖全部子元素) */
+#root { position: fixed; top: 0; left: 0; right: 0; bottom: 0; touch-action: none; }
+
+/* 公共 overlay 元素 */
+.ov-elem { position: absolute; display: none; }
+
+/* pos 字段锚点映射 */
+.pos-1 { top:20px; left:20px; }
+.pos-2 { top:20px; right:20px; }
+.pos-3 { bottom:20px; left:20px; }
+.pos-4 { bottom:20px; right:20px; }
+.pos-5 { bottom:20px; left:50%; transform:translateX(-50%); }
+.pos-6 { top:20px; left:50%; transform:translateX(-50%); }
+
+/* 广告标签：原生是裸 TextView，无背景/圆角 */
+/* pointer-events:none 对齐原生：不可点击的 View 不吃触摸，事件穿透到底层 clickArea */
+#adLabel { color:#AFAFAF; font-size:13px; height:25px; line-height:25px; z-index:90; pointer-events:none; }
+
+/* 音量按钮 */
+#audioBtn { width:29px; height:29px; border-radius:14.5px; background:rgba(45,47,50,0.902); color:#fff; display:none; align-items:center; justify-content:center; cursor:pointer; z-index:90; }
+#audioBtn.flex { display:flex; }
+#audioBtn img { width:17px; height:17px; object-fit:contain; }
+
+/* 进度条：原生每 500ms 硬跳一次，无过渡动画 */
+#progressBar { position:absolute; bottom:10px; left:0; right:0; height:2.5px; background:#AEAEAE; z-index:90; pointer-events:none; }
+#progressFill { height:100%; width:0%; background:#F8CC46; }
+
+/* 点击区域（z 最低） */
+#clickArea { position:absolute; background:transparent; z-index:10; cursor:pointer; }
+
+/* CTA 容器 */
+#ctaBtn { z-index:90; cursor:pointer; }
+
+/* 关闭/跳过按钮容器 */
+#closeBtn { display:none; align-items:center; justify-content:center; cursor:pointer; z-index:100; -webkit-tap-highlight-color:transparent; }
+#closeBtn.flex { display:flex; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div id="clickArea"></div>
+  <div id="adLabel" class="ov-elem">AD</div>
+  <div id="audioBtn" class="ov-elem"></div>
+  <div id="progressBar" style="display:none"><div id="progressFill"></div></div>
+  <div id="ctaBtn" class="ov-elem"></div>
+  <div id="closeBtn"></div>
+</div>
+
+<script src="ad_overlay/lib/lottie_light.min.js"></script>
+<script>
+/* 从 lotties/ 统一加载 lottie JSON，复用 native 资源，避免 ad_overlay/lotties/*.data.js 重复包体。
+   同步 XHR，bundle.js 执行前所有 window.LOTTIE_* 已就绪。
+   路径必须保持相对：本文件会从两个 origin 加载——内置 assets 时是
+   file:///android_asset/ad_overlay_v2.html，动态模版时是
+   https://appassets.androidplatform.net/h5tmpl/ad_overlay_v2.html。相对路径在两种情况下都解析到
+   同级的 lotties/ 下；若写成绝对的 file:///android_asset/...，从 https 虚拟域名加载时会变成跨源请求被拦，
+   这些同步 XHR 全部抛错 → window.LOTTIE_* 全为 undefined → setupCta 挂 lottie 时抛 →
+   被 initOverlay 的 try/catch 捕获 → onOverlayInitFailed → 每次曝光都静默降级回原生。
+   同理 <script src> 与各处 lottie assetsPath 也一律保持相对。 */
+(function () {
+  function load(varName, path) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', path, false);
+    xhr.send();
+    window[varName] = JSON.parse(xhr.responseText);
+  }
+  /* video CTA 复杂动效（drawer / neon，图片由 bundle.js assetsPath 指向 lotties/ 目录） */
+  load('LOTTIE_DRAWER',          'lotties/video/drawer/drawer/drawer.json');
+  load('LOTTIE_DRAWER_FALLBACK', 'lotties/video/drawer/drawer_fallback/drawer_fallback.json');
+  load('LOTTIE_NEON',            'lotties/video/neon/neon/neon.json');
+  load('LOTTIE_NEON_FALLBACK',   'lotties/video/neon/neon_fallback/neon_fallback.json');
+  /* endcard 复杂动效 */
+  load('LOTTIE_ENDCARD_GLOWING_BORDER', 'lotties/endcard/glowing_border/glowing_border.json');
+  load('LOTTIE_ENDCARD_NEON',           'lotties/endcard/neon/neon.json');
+  /* video CTA 静态动效 */
+  var VS = ['color', 'shake', 'slip', 'sweeping_light', 'zoom'];
+  VS.forEach(function (t) {
+    for (var i = 0; i < 4; i++) {
+      var n = ('0' + i).slice(-2);
+      load('LOTTIE_VIDEO_STATIC_' + t.toUpperCase() + '_' + n, 'lotties/video/' + t + '/' + n + '.json');
+    }
+  });
+  /* endcard simple 动效 */
+  VS.forEach(function (t) {
+    for (var i = 0; i < 4; i++) {
+      var n = ('0' + i).slice(-2);
+      load('LOTTIE_ENDCARD_SIMPLE_' + t.toUpperCase() + '_' + n, 'lotties/endcard/' + t + '/' + n + '.json');
+    }
+  });
+})();
+</script>
+<script src="ad_overlay/bundle.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# ============================================================================
+# 广告域模块自描述清单 - arc-config-plugin / ModuleCatalog 消费
+# ============================================================================
+# 文档：S4.3 plan 4.3.1（每广告模块根目录放 module.yaml）
+# 命名规范：与 ModuleDescriptor.java 字段对齐（见 JYHWBXSDK/tools/arc-config-plugin/src/main/java/com/hs/sdk/plugin/config/catalog/ModuleDescriptor.java）
+# 扫描入口：S4.2 Day 6 ModuleCatalog（本期仅扫 host 仓 <rootProject>/catalog/，Phase 2 扩展为 classpath META-INF/arc-catalog/*.yaml）
+# 当前接入路径（Phase 1）：
+#   1. 本文件位于 SDK 仓内（自描述）
+#   2. Phase 2 实现 classpath META-INF/arc-catalog/*.yaml 扫描后，AGP 把本文件包入 AAR resources 内，ScanArcCatalogTask 自动消费
+#   3. Phase 1 验证可手动 cp 本文件到 host 仓 <rootProject>/catalog/ 测试 ScanArcCatalogTask 解析
+# ============================================================================
+
+# 模块标识（在 catalog 内必须唯一）
+name: arcad-ad-api
+
+# Maven 坐标（与 build.gradle apply arcpublish.gradle 后的产物一致）
+groupId: com.hs.sdk
+artifactId: ad-api
+version: 5.0.2-PoC-SNAPSHOT
+
+# 优先级（数字小的先初始化；本期排序仅用于 catalog.log 报告排序）
+# 50:  最基础（API 接口契约）
+# 100: 一般广告模块
+# 200: 上层聚合（含 mediation）
+priority: 50
+
+# 依赖的同 catalog 内其他模块（artifactId）
+dependsOn:
+  - common
+  - base
+
+# 本模块对外暴露的 SPI 接口（Phase 2 FeatureDependencyManager 用于自动扫描接入方实现）
+serviceProviders:
+  - com.hs.sdk.ad.api.IAdService
+  - com.hs.sdk.ad.api.IAdRevenueListener
+
+# 本模块需要的 manifestPlaceholders（接入方在 app_config.yaml 内填值，由 arc-config-plugin / ManifestDistributor 注入）
+placeholders:
+  required: []
+  optional: []
+
+# 功能标签（Phase 2 FeatureDependencyManager 根据接入方 features 开关自动加 implementation）
+features:
+  - ad
+  - ad-api

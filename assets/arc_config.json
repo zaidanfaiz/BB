@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "generator": "arc-config-plugin",
+    "source": "app_config.yaml",
+    "warning": "AUTO-GENERATED. DO NOT EDIT."
+  },
+  "app": {
+    "game_id": "blockblast",
+    "package_name": "com.block.juggle"
+  },
+  "ad": {
+    "admob": {
+      "app_id": "ca-app-pub-9495093642646304~3665876364"
+    },
+    "adx": {
+      "app_key": "X2eyd6FCfXTgLtgZ"
+    },
+    "max": {
+      "sdk_key": "CzXnh9Lt4083uWpsmEICTtlxgkVMvNP6w3N69nouIT3zCXoIJkiVnQ8nIlwin4H2ErCdWcmPbk9LKQS5iO9JGo"
+    }
+  },
+  "rn": {
+    "bundle_name": "block.hot.bundle",
+    "bridge_version": "1.6.4"
+  }
+}
