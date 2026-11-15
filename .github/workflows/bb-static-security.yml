@@ -9,6 +9,7 @@ on:
       - "tools/bb_deep_audit.py"
       - "tools/bb_policy_checks.py"
       - "tools/bb_dex_triage.py"
+      - "tools/bb_provider_review.py"
       - "tools/bb_hek_inventory.py"
       - "tools/bb_elf_runtime.py"
       - "AndroidManifest.xml"
@@ -45,6 +46,8 @@ jobs:
         run: python tools/bb_policy_checks.py
       - name: Inspect all DEX class and method metadata
         run: python tools/bb_dex_triage.py
+      - name: Review exported provider permissions and declared DEX entry methods
+        run: python tools/bb_provider_review.py
       - name: Inventory HEK headers across bundled assets
         run: python tools/bb_hek_inventory.py
       - name: Inspect Cocos2d ELF metadata and runtime markers
